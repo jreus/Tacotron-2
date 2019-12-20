@@ -3,8 +3,12 @@
 This package is Tacotron-2 test trainer packaged for use with Google Cloud Compute.
 
 This is a new branch on the fork of the original Tacotron-2 repository.
+https://www.atlassian.com/git/tutorials/using-branches
 ```
 git branch gcloud
+git checkout gcloud
+...do commits...
+git push --set-upstream origin gcloud
 ```
 
 ORIGINAL CODE TRAINING COMMANDS:
