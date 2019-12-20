@@ -36,7 +36,7 @@ def norm_data(args):
 	merge_books = (args.merge_books=='True')
 
 	print('Selecting data folders..')
-	supported_datasets = ['LJSpeech-1.0', 'LJSpeech-1.1', 'M-AILABS']
+	supported_datasets = ['LJSpeech-1.0', 'LJSpeech-1.1', 'M-AILABS', 'LJSpeech-Mini']
 	if args.dataset not in supported_datasets:
 		raise ValueError('dataset value entered {} does not belong to supported datasets: {}'.format(
 			args.dataset, supported_datasets))
@@ -79,7 +79,7 @@ def norm_data(args):
 def run_preprocess(args, hparams):
 	input_folders = norm_data(args)
 	output_folder = os.path.join(args.base_dir, args.output)
-
+	print("INPUT FOLDERS!", input_folders)
 	preprocess(args, input_folders, output_folder, hparams)
 
 

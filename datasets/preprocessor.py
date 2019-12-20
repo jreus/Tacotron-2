@@ -29,6 +29,7 @@ def build_from_path(hparams, input_dirs, mel_dir, linear_dir, wav_dir, n_jobs=12
 	executor = ProcessPoolExecutor(max_workers=n_jobs)
 	futures = []
 	index = 1
+	print("INPUT DIRS", input_dirs)
 	for input_dir in input_dirs:
 		with open(os.path.join(input_dir, 'metadata.csv'), encoding='utf-8') as f:
 			for line in f:

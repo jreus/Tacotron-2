@@ -34,7 +34,7 @@ def add_embedding_stats(summary_writer, embedding_names, paths_to_meta, checkpoi
 		#Specifiy the embedding variable and the metadata
 		embedding.tensor_name = embedding_name
 		embedding.metadata_path = path_to_meta
-	
+
 	#Project the embeddings to space dimensions for visualization
 	tf.contrib.tensorboard.plugins.projector.visualize_embeddings(summary_writer, config)
 
@@ -51,7 +51,7 @@ def add_train_stats(model, hparams):
 			for i in range(hparams.tacotron_num_gpus):
 				tf.summary.histogram('linear_outputs %d' % i, model.tower_linear_outputs[i])
 				tf.summary.histogram('linear_targets %d' % i, model.tower_linear_targets[i])
-		
+
 		tf.summary.scalar('regularization_loss', model.regularization_loss)
 		tf.summary.scalar('stop_token_loss', model.stop_token_loss)
 		tf.summary.scalar('loss', model.loss)
@@ -106,7 +106,7 @@ def model_test_mode(args, feeder, hparams, global_step):
 				is_training=False, is_evaluating=True, split_infos=feeder.eval_split_infos)
 		else:
 			model.initialize(feeder.eval_inputs, feeder.eval_input_lengths, feeder.eval_mel_targets, feeder.eval_token_targets,
-				targets_lengths=feeder.eval_targets_lengths, global_step=global_step, is_training=False, is_evaluating=True, 
+				targets_lengths=feeder.eval_targets_lengths, global_step=global_step, is_training=False, is_evaluating=True,
 				split_infos=feeder.eval_split_infos)
 		model.add_loss()
 		return model
@@ -149,6 +149,7 @@ def train(log_dir, args, hparams):
 	#Set up data feeder
 	coord = tf.train.Coordinator()
 	with tf.variable_scope('datafeeder') as scope:
+		print("OK WE GONNA FEED:", coord, input_path)
 		feeder = Feeder(coord, input_path, hparams)
 
 	#Set up model:
