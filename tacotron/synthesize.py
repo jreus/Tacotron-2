@@ -5,8 +5,8 @@ import time
 from time import sleep
 
 import tensorflow as tf
-from hparams import hparams, hparams_debug_string
-from infolog import log
+from trainer.hparams import hparams, hparams_debug_string
+from trainer.infolog import log
 from tacotron.synthesizer import Synthesizer
 from tqdm import tqdm
 

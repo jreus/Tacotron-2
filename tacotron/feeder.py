@@ -5,7 +5,7 @@ import traceback
 
 import numpy as np
 import tensorflow as tf
-from infolog import log
+from trainer.infolog import log
 from sklearn.model_selection import train_test_split
 from tacotron.utils.text import text_to_sequence
 
@@ -27,6 +27,7 @@ class Feeder:
 		# Load metadata
 		self._mel_dir = os.path.join(os.path.dirname(metadata_filename), 'mels')
 		self._linear_dir = os.path.join(os.path.dirname(metadata_filename), 'linear')
+		print("METADATA FILENAME!!!!", metadata_filename)
 		with open(metadata_filename, encoding='utf-8') as f:
 			self._metadata = [line.strip().split('|') for line in f]
 			frame_shift_ms = hparams.hop_size / hparams.sample_rate

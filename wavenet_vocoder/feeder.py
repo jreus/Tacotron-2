@@ -5,7 +5,7 @@ import time
 import numpy as np
 import tensorflow as tf
 from datasets import audio
-from infolog import log
+from trainer.infolog import log
 from keras.utils import np_utils
 from sklearn.model_selection import train_test_split
 
@@ -324,7 +324,7 @@ class Feeder:
 
 			if self._hparams.clip_for_wavenet:
 				c_features = [np.clip(x, T2_output_range[0], T2_output_range[1]) for x in c_features]
-				
+
 			c_batch = np.stack([_pad_inputs(x, maxlen, _pad=T2_output_range[0]) for x in c_features]).astype(np.float32)
 			assert len(c_batch.shape) == 3
 			#[batch_size, c_channels, time_steps]

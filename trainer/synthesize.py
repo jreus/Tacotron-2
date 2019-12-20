@@ -5,8 +5,8 @@ from time import sleep
 
 import tensorflow as tf
 
-from hparams import hparams
-from infolog import log
+from trainer.hparams import hparams
+from trainer.infolog import log
 from tacotron.synthesize import tacotron_synthesize
 from wavenet_vocoder.synthesize import wavenet_synthesize
 

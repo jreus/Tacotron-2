@@ -3,7 +3,7 @@ import os
 from multiprocessing import cpu_count
 
 from datasets import preprocessor
-from hparams import hparams
+from trainer.hparams import hparams
 from tqdm import tqdm
 
 
@@ -36,13 +36,13 @@ def norm_data(args):
 	merge_books = (args.merge_books=='True')
 
 	print('Selecting data folders..')
-	supported_datasets = ['LJSpeech-1.0', 'LJSpeech-1.1', 'M-AILABS']
+	supported_datasets = ['LJSpeech-1.0', 'LJSpeech-1.1', 'M-AILABS', 'LJSpeech-Mini']
 	if args.dataset not in supported_datasets:
 		raise ValueError('dataset value entered {} does not belong to supported datasets: {}'.format(
 			args.dataset, supported_datasets))
 
 	if args.dataset.startswith('LJSpeech'):
-		return [os.path.join(args.base_dir, args.dataset)]
+		return [os.path.join(args.datasetdir, args.dataset)]
 
 
 	if args.dataset == 'M-AILABS':
@@ -57,7 +57,7 @@ def norm_data(args):
 			raise ValueError('Please enter a supported voice option to use from M-AILABS dataset! \n{}'.format(
 				supported_voices))
 
-		path = os.path.join(args.base_dir, args.language, 'by_book', args.voice)
+		path = os.path.join(args.datasetdir, args.language, 'by_book', args.voice)
 		supported_readers = [e for e in os.listdir(path) if os.path.isdir(os.path.join(path,e))]
 		if args.reader not in supported_readers:
 			raise ValueError('Please enter a valid reader for your language and voice settings! \n{}'.format(
@@ -78,33 +78,6 @@ def norm_data(args):
 
 def run_preprocess(args, hparams):
 	input_folders = norm_data(args)
-	output_folder = os.path.join(args.base_dir, args.output)
-
+	output_folder = os.path.join(args.datasetdir, args.output)
+	print("INPUT FOLDERS!", input_folders)
 	preprocess(args, input_folders, output_folder, hparams)
-
-
-def main():
-	print('initializing preprocessing..')
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--base_dir', default='')
-	parser.add_argument('--hparams', default='',
-		help='Hyperparameter overrides as a comma-separated list of name=value pairs')
-	parser.add_argument('--dataset', default='LJSpeech-1.1')
-	parser.add_argument('--language', default='en_US')
-	parser.add_argument('--voice', default='female')
-	parser.add_argument('--reader', default='mary_ann')
-	parser.add_argument('--merge_books', default='False')
-	parser.add_argument('--book', default='northandsouth')
-	parser.add_argument('--output', default='training_data')
-	parser.add_argument('--n_jobs', type=int, default=cpu_count())
-	args = parser.parse_args()
-
-	modified_hp = hparams.parse(args.hparams)
-
-	assert args.merge_books in ('False', 'True')
-
-	run_preprocess(args, modified_hp)
-
-
-if __name__ == '__main__':
-	main()

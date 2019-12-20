@@ -7,7 +7,7 @@ import pyaudio
 import sounddevice as sd
 import tensorflow as tf
 from datasets import audio
-from infolog import log
+from trainer.infolog import log
 from librosa import effects
 from tacotron.models import create_model
 from tacotron.utils import plot
@@ -140,7 +140,7 @@ class Synthesizer:
 
 		else:
 			linears, mels, alignments, stop_tokens = self.session.run([self.linear_outputs, self.mel_outputs, self.alignments, self.stop_token_prediction], feed_dict=feed_dict)
-			
+
 			#Linearize outputs (1D arrays)
 			linears = [linear for gpu_linear in linears for linear in gpu_linear]
 			mels = [mel for gpu_mels in mels for mel in gpu_mels]

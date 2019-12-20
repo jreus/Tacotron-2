@@ -1,6 +1,6 @@
-import tensorflow as tf 
+import tensorflow as tf
 from tacotron.utils.symbols import symbols
-from infolog import log
+from trainer.infolog import log
 from tacotron.models.helpers import TacoTrainingHelper, TacoTestHelper
 from tacotron.models.modules import *
 from tensorflow.contrib.seq2seq import dynamic_decode
@@ -96,7 +96,7 @@ class Tacotron():
 		tower_encoder_outputs = []
 		tower_residual = []
 		tower_projected_residual = []
-		
+
 		# 1. Declare GPU Devices
 		gpus = ["/gpu:{}".format(i) for i in range(hp.tacotron_num_gpus)]
 		for i in range(hp.tacotron_num_gpus):
@@ -173,7 +173,7 @@ class Tacotron():
 						swap_memory=hp.tacotron_swap_with_cpu)
 
 
-					# Reshape outputs to be one output per entry 
+					# Reshape outputs to be one output per entry
 					#==> [batch_size, non_reduced_decoder_steps (decoder_steps * r), num_mels]
 					decoder_output = tf.reshape(frames_prediction, [batch_size, -1, hp.num_mels])
 					stop_token_prediction = tf.reshape(stop_token_prediction, [batch_size, -1])
@@ -187,7 +187,7 @@ class Tacotron():
 					#Compute residual using post-net ==> [batch_size, decoder_steps * r, postnet_channels]
 					residual = postnet(decoder_output)
 
-					#Project residual to same dimension as mel spectrogram 
+					#Project residual to same dimension as mel spectrogram
 					#==> [batch_size, decoder_steps * r, num_mels]
 					residual_projection = FrameProjection(hp.num_mels, scope='postnet_projection')
 					projected_residual = residual_projection(residual)
@@ -203,7 +203,7 @@ class Tacotron():
 					if post_condition:
 						# Add post-processing CBHG. This does a great job at extracting features from mels before projection to Linear specs.
 						post_cbhg = CBHG(hp.cbhg_kernels, hp.cbhg_conv_channels, hp.cbhg_pool_size, [hp.cbhg_projection, hp.num_mels],
-							hp.cbhg_projection_kernel_size, hp.cbhg_highwaynet_layers, 
+							hp.cbhg_projection_kernel_size, hp.cbhg_highwaynet_layers,
 							hp.cbhg_highway_units, hp.cbhg_rnn_units, hp.batch_norm_position, is_training, name='CBHG_postnet')
 
 						#[batch_size, decoder_steps(mel_frames), cbhg_channels]
@@ -452,9 +452,9 @@ class Tacotron():
 		hp = self._hparams
 
 		#Compute natural exponential decay
-		lr = tf.train.exponential_decay(init_lr, 
+		lr = tf.train.exponential_decay(init_lr,
 			global_step - hp.tacotron_start_decay, #lr = 1e-3 at step 50k
-			self.decay_steps, 
+			self.decay_steps,
 			self.decay_rate, #lr = 1e-5 around step 310k
 			name='lr_exponential_decay')
 

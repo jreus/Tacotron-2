@@ -3,8 +3,8 @@ import os
 
 import numpy as np
 import tensorflow as tf
-from hparams import hparams, hparams_debug_string
-from infolog import log
+from trainer.hparams import hparams, hparams_debug_string
+from trainer.infolog import log
 from tqdm import tqdm
 from wavenet_vocoder.synthesizer import Synthesizer
 

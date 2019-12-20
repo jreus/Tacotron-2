@@ -1,13 +1,13 @@
 import numpy as np
 import tensorflow as tf
 from datasets import audio
-from infolog import log
+from trainer.infolog import log
 from wavenet_vocoder import util
 from wavenet_vocoder.util import *
 
 from .gaussian import sample_from_gaussian
 from .mixture import sample_from_discretized_mix_logistic
-from .modules import (Conv1D1x1, ConvTranspose2D, ConvTranspose1D, ResizeConvolution, SubPixelConvolution, NearestNeighborUpsample, DiscretizedMixtureLogisticLoss, 
+from .modules import (Conv1D1x1, ConvTranspose2D, ConvTranspose1D, ResizeConvolution, SubPixelConvolution, NearestNeighborUpsample, DiscretizedMixtureLogisticLoss,
 	GaussianMaximumLikelihoodEstimation, MaskedMeanSquaredError, LeakyReluActivation, MaskedCrossEntropyLoss, ReluActivation, ResidualConv1DGLU, WeightNorm, Embedding)
 
 
@@ -102,15 +102,15 @@ class WaveNet():
 		#first (embedding) convolution
 		with tf.variable_scope('input_convolution'):
 			if self.scalar_input:
-				self.first_conv = Conv1D1x1(hparams.residual_channels, 
-					weight_normalization=hparams.wavenet_weight_normalization, 
-					weight_normalization_init=init, 
+				self.first_conv = Conv1D1x1(hparams.residual_channels,
+					weight_normalization=hparams.wavenet_weight_normalization,
+					weight_normalization_init=init,
 					weight_normalization_init_scale=hparams.wavenet_init_scale,
 					name='input_convolution')
 			else:
-				self.first_conv = Conv1D1x1(hparams.residual_channels, 
-					weight_normalization=hparams.wavenet_weight_normalization, 
-					weight_normalization_init=init, 
+				self.first_conv = Conv1D1x1(hparams.residual_channels,
+					weight_normalization=hparams.wavenet_weight_normalization,
+					weight_normalization_init=init,
 					weight_normalization_init_scale=hparams.wavenet_init_scale,
 					name='input_convolution')
 
@@ -126,8 +126,8 @@ class WaveNet():
 			dropout=hparams.wavenet_dropout,
 			cin_channels=hparams.cin_channels,
 			gin_channels=hparams.gin_channels,
-			weight_normalization=hparams.wavenet_weight_normalization, 
-			init=init, 
+			weight_normalization=hparams.wavenet_weight_normalization,
+			init=init,
 			init_scale=hparams.wavenet_init_scale,
 			residual_legacy=hparams.residual_legacy,
 			name='ResidualConv1DGLU_{}'.format(layer)))
@@ -136,15 +136,15 @@ class WaveNet():
 		with tf.variable_scope('skip_convolutions'):
 			self.last_conv_layers = [
 			ReluActivation(name='final_conv_relu1'),
-			Conv1D1x1(hparams.skip_out_channels, 
-				weight_normalization=hparams.wavenet_weight_normalization, 
-				weight_normalization_init=init, 
+			Conv1D1x1(hparams.skip_out_channels,
+				weight_normalization=hparams.wavenet_weight_normalization,
+				weight_normalization_init=init,
 				weight_normalization_init_scale=hparams.wavenet_init_scale,
-				name='final_convolution_1'), 
+				name='final_convolution_1'),
 			ReluActivation(name='final_conv_relu2'),
-			Conv1D1x1(hparams.out_channels, 
-				weight_normalization=hparams.wavenet_weight_normalization, 
-				weight_normalization_init=init, 
+			Conv1D1x1(hparams.out_channels,
+				weight_normalization=hparams.wavenet_weight_normalization,
+				weight_normalization_init=init,
 				weight_normalization_init_scale=hparams.wavenet_init_scale,
 				name='final_convolution_2'),]
 
@@ -191,7 +191,7 @@ class WaveNet():
 								padding='same', strides=(1, s), NN_init=hparams.NN_init, NN_scaler=hparams.NN_scaler,
 								up_layers=len(hparams.upsample_scales), name='SubPixelConvolution_layer_{}'.format(i))
 
-						self.upsample_conv.append(maybe_Normalize_weights(convt, 
+						self.upsample_conv.append(maybe_Normalize_weights(convt,
 							hparams.wavenet_weight_normalization, init, hparams.wavenet_init_scale))
 
 						if hparams.upsample_activation == 'LeakyRelu':
@@ -488,21 +488,21 @@ class WaveNet():
 							tower_loss = MaskedCrossEntropyLoss(self.tower_y_hat_q[i][:, :-1, :], self.tower_y[i][:, 1:], mask=self.tower_mask[i])
 						else:
 							if self._hparams.out_channels == 2:
-								tower_loss = GaussianMaximumLikelihoodEstimation(self.tower_y_hat_train[i][:, :, :-1], self.tower_y[i][:, 1:, :], 
+								tower_loss = GaussianMaximumLikelihoodEstimation(self.tower_y_hat_train[i][:, :, :-1], self.tower_y[i][:, 1:, :],
 									hparams=self._hparams, mask=self.tower_mask[i])
 							else:
-								tower_loss = DiscretizedMixtureLogisticLoss(self.tower_y_hat_train[i][:, :, :-1], self.tower_y[i][:, 1:, :], 
+								tower_loss = DiscretizedMixtureLogisticLoss(self.tower_y_hat_train[i][:, :, :-1], self.tower_y[i][:, 1:, :],
 									hparams=self._hparams, mask=self.tower_mask[i])
-								
+
 					elif self.is_evaluating:
 						if is_mulaw_quantize(self._hparams.input_type):
 							tower_loss = MaskedCrossEntropyLoss(self.tower_y_hat_eval[i], self.tower_y_eval[i], lengths=[self.tower_eval_length[i]])
 						else:
 							if self._hparams.out_channels == 2:
-								tower_loss = GaussianMaximumLikelihoodEstimation(self.tower_y_hat_eval[i], self.tower_y_eval[i], 
+								tower_loss = GaussianMaximumLikelihoodEstimation(self.tower_y_hat_eval[i], self.tower_y_eval[i],
 									hparams=self._hparams, lengths=[self.tower_eval_length[i]])
 							else:
-								tower_loss = DiscretizedMixtureLogisticLoss(self.tower_y_hat_eval[i], self.tower_y_eval[i], 
+								tower_loss = DiscretizedMixtureLogisticLoss(self.tower_y_hat_eval[i], self.tower_y_eval[i],
 									hparams=self._hparams, lengths=[self.tower_eval_length[i]])
 
 					else:
@@ -534,7 +534,7 @@ class WaveNet():
 			with tf.variable_scope('optimizer'):
 				#Create lr schedule
 				if hp.wavenet_lr_schedule == 'noam':
-					learning_rate = self._noam_learning_rate_decay(hp.wavenet_learning_rate, 
+					learning_rate = self._noam_learning_rate_decay(hp.wavenet_learning_rate,
 						global_step,
 						warmup_steps=hp.wavenet_warmup)
 				else:
@@ -829,7 +829,7 @@ class WaveNet():
 			new_queues = []
 			for conv, queue in zip(self.residual_layers, queues):
 				x, h, new_queue = conv.incremental_step(x, c=ct, g=gt, queue=queue)
-				
+
 				if self._hparams.legacy:
 					skips = h if skips is None else (skips + h) * np.sqrt(0.5)
 				else:
@@ -919,5 +919,3 @@ class WaveNet():
 				f.clear_queue()
 			except AttributeError:
 				pass
-
-

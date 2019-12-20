@@ -5,11 +5,11 @@ import time
 import traceback
 from datetime import datetime
 
-import infolog
+import trainer.infolog as infolog
 import librosa
 import numpy as np
 import tensorflow as tf
-from hparams import hparams_debug_string
+from trainer.hparams import hparams_debug_string
 from datasets.audio import save_wavenet_wav, melspectrogram
 from tacotron.utils import ValueWindow
 from wavenet_vocoder.feeder import Feeder, _interp
@@ -34,7 +34,7 @@ def add_embedding_stats(summary_writer, embedding_names, paths_to_meta, checkpoi
 		#Specifiy the embedding variable and the metadata
 		embedding.tensor_name = embedding_name
 		embedding.metadata_path = path_to_meta
-	
+
 	#Project the embeddings to space dimensions for visualization
 	tf.contrib.tensorboard.plugins.projector.visualize_embeddings(summary_writer, config)
 
@@ -128,10 +128,10 @@ def eval_step(sess, global_step, model, plot_dir, wav_dir, summary_writer, hpara
 def save_log(sess, global_step, model, plot_dir, wav_dir, hparams, model_name):
 	log('\nSaving intermediate states at step {}'.format(global_step))
 	idx = 0
-	y_hat, y, loss, length, input_mel, upsampled_features = sess.run([model.tower_y_hat_log[0][idx], 
-		model.tower_y_log[0][idx], 
+	y_hat, y, loss, length, input_mel, upsampled_features = sess.run([model.tower_y_hat_log[0][idx],
+		model.tower_y_log[0][idx],
 		model.loss,
-		model.tower_input_lengths[0][idx], 
+		model.tower_input_lengths[0][idx],
 		model.tower_c[0][idx], model.tower_upsampled_local_features[0][idx]])
 
 	#mask by length
@@ -296,7 +296,7 @@ def train(log_dir, args, hparams, input_path):
 				#Run one forward pass for model parameters initialization (make prediction on init_batch)
 				_ = sess.run(init_model.tower_y_hat)
 				log('Data dependent initialization done. Starting training!')
-			
+
 			#Training loop
 			while not coord.should_stop() and step < args.wavenet_train_steps:
 				start_time = time.time()
