@@ -11,7 +11,7 @@ git checkout gcloud
 git push --set-upstream origin gcloud
 ```
 
-ORIGINAL CODE TRAINING COMMANDS:
+TRAINING COMMAND FROM "OLD" TACOTRON *train.py*
 ```
 python train.py --tacotron_input='../datasets/ljmini_data/train.txt' --model='Tacotron-2'
 
@@ -62,14 +62,35 @@ There is no such thing as 'minimal cost' - the network is always trying to go to
 
 tl;dr - just set a target reasonable target error alongside with a maximum amount of iterations.
 
+## GET YOUR CLOUD STORAGE SET UP
+Make a unique ID for my storage bucket...
+```
+PROJECT_ID=$(gcloud config list project --format "value(core.project)")
+BUCKET_NAME=${PROJECT_ID}-taco1
+echo $BUCKET_NAME
+REGION=europe-west4
+gsutil mb -l $REGION gs://$BUCKET_NAME
+```
+
+
 ## HOW TO RUN LOCAL TEST
 ```
 cd Tacotron-2.gcloud.test/
-DATADIR=../datasets/
-DATASET=LJSpeech-Mini
-MODEL_DIR=output
-gcloud ai-platform local train --module-name=trainer.task --package-path=trainer/ -- --datasetdir=$DATADIR --dataset=$DATASET --modeltype='Tacotron-2' --tacotron_train_steps=5 --wavenet_train_steps=5 --verbosity=DEBUG
+DATASETDIR=../datasets/LJSpeech-Mini/
+PREPROCESS_DIR=../datasets/preprocess_ljspeechmini/
+TACO_INPUT=$PREPROCESS_DIR/train.txt
+
+gcloud ai-platform local train --module-name=trainer.task --package-path=trainer -- --datasetdir=$DATASETDIR --datasetformat=LJSpeech-1.1 --preprocess=True --preprocess-output-dir=$PREPROCESS_DIR --tacotron-input-dir=$PREPROCESS_DIR --modeltype='Tacotron-2' --tacotron_train_steps=5 --wavenet_train_steps=5 --verbosity=DEBUG
 ```
+
+## Try to synthesize something...
+
+```
+python synthesize.py --model='Tacotron-2' --model_dir=output/logs-Tacotron-2/
+
+```
+
+
 
 ## HOW TO PACKAGE FOR CLOUD PROCESSING
 

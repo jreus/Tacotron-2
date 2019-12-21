@@ -168,9 +168,9 @@ def save_checkpoint(sess, saver, checkpoint_path, global_step):
 def model_train_mode(args, feeder, hparams, global_step, init=False):
 	with tf.variable_scope('WaveNet_model', reuse=tf.AUTO_REUSE) as scope:
 		model_name = None
-		if args.model == 'Tacotron-2':
+		if args.modeltype == 'Tacotron-2':
 			model_name = 'WaveNet'
-		model = create_model(model_name or args.model, hparams, init)
+		model = create_model(model_name or args.modeltype, hparams, init)
 		#initialize model to train mode
 		model.initialize(feeder.targets, feeder.local_condition_features, feeder.global_condition_features,
 			feeder.input_lengths, x=feeder.inputs)
@@ -182,9 +182,9 @@ def model_train_mode(args, feeder, hparams, global_step, init=False):
 def model_test_mode(args, feeder, hparams, global_step):
 	with tf.variable_scope('WaveNet_model', reuse=tf.AUTO_REUSE) as scope:
 		model_name = None
-		if args.model == 'Tacotron-2':
+		if args.modeltype == 'Tacotron-2':
 			model_name = 'WaveNet'
-		model = create_model(model_name or args.model, hparams)
+		model = create_model(model_name or args.modeltype, hparams)
 		#initialize model to test mode
 		model.initialize(feeder.eval_targets, feeder.eval_local_condition_features, feeder.eval_global_condition_features,
 			feeder.eval_input_lengths)
@@ -210,11 +210,11 @@ def train(log_dir, args, hparams, input_path):
 	os.makedirs(meta_folder, exist_ok=True)
 
 	checkpoint_path = os.path.join(save_dir, 'wavenet_model.ckpt')
-	input_path = os.path.join(args.base_dir, input_path)
+	print("OUTPUT DIR IS {} ___ INPUT PATH is {}".format(args.output_dir, input_path))
 
 	log('Checkpoint_path: {}'.format(checkpoint_path))
 	log('Loading training data from: {}'.format(input_path))
-	log('Using model: {}'.format(args.model))
+	log('Using model: {}'.format(args.modeltype))
 	log(hparams_debug_string())
 
 	#Start by setting a seed for repeatability
@@ -223,7 +223,7 @@ def train(log_dir, args, hparams, input_path):
 	#Set up data feeder
 	coord = tf.train.Coordinator()
 	with tf.variable_scope('datafeeder') as scope:
-		feeder = Feeder(coord, input_path, args.base_dir, hparams)
+		feeder = Feeder(coord, input_path, args.wavenet_input_dir, hparams)
 
 	#Set up model
 	global_step = tf.Variable(0, name='global_step', trainable=False)

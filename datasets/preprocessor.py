@@ -13,7 +13,7 @@ def build_from_path(hparams, input_dirs, mel_dir, linear_dir, wav_dir, n_jobs=12
 
 	Args:
 		- hparams: hyper parameters
-		- input_dir: input directory that contains the files to prerocess
+		- input_dirs: input directory that contains the files to prerocess
 		- mel_dir: output directory of the preprocessed speech mel-spectrogram dataset
 		- linear_dir: output directory of the preprocessed speech linear-spectrogram dataset
 		- wav_dir: output directory of the preprocessed speech audio dataset
@@ -29,6 +29,8 @@ def build_from_path(hparams, input_dirs, mel_dir, linear_dir, wav_dir, n_jobs=12
 	executor = ProcessPoolExecutor(max_workers=n_jobs)
 	futures = []
 	index = 1
+	if type(input_dirs) != list:
+		input_dirs = [input_dirs]
 	print("INPUT DIRS", input_dirs)
 	for input_dir in input_dirs:
 		with open(os.path.join(input_dir, 'metadata.csv'), encoding='utf-8') as f:

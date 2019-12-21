@@ -16,10 +16,15 @@ def prepare_run(args):
 	os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 	run_name = args.name or args.tacotron_name or args.model
-	taco_checkpoint = os.path.join('logs-' + run_name, 'taco_' + args.checkpoint)
+
+	taco_checkpoint = os.path.join(args.model_dir, args.taco_checkpoint_dir)
+
+	print("RUN_NAME: {} ARGS.taco_checkpointdir: {} and ".format(run_name, args.taco_checkpoint_dir))
+
 
 	run_name = args.name or args.wavenet_name or args.model
-	wave_checkpoint = os.path.join('logs-' + run_name, 'wave_' + args.checkpoint)
+	wave_checkpoint = os.path.join(args.model_dir, args.wave_checkpoint_dir)
+
 	return taco_checkpoint, wave_checkpoint, modified_hp
 
 def get_sentences(args):
@@ -47,15 +52,17 @@ def synthesize(args, hparams, taco_checkpoint, wave_checkpoint, sentences):
 def main():
 	accepted_modes = ['eval', 'synthesis', 'live']
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--checkpoint', default='pretrained/', help='Path to model checkpoint')
+	parser.add_argument('--taco_checkpoint_dir', default='taco_pretrained/', help='Path to tacotron model checkpoint inside model dir')
+	parser.add_argument('--wave_checkpoint_dir', default='wave_pretrained/', help='Path to wavenet checkpoint inside model dir')
 	parser.add_argument('--hparams', default='',
 		help='Hyperparameter overrides as a comma-separated list of name=value pairs')
 	parser.add_argument('--name', help='Name of logging directory if the two models were trained together.')
 	parser.add_argument('--tacotron_name', help='Name of logging directory of Tacotron. If trained separately')
 	parser.add_argument('--wavenet_name', help='Name of logging directory of WaveNet. If trained separately')
 	parser.add_argument('--model', default='Tacotron-2')
+	parser.add_argument('--model_dir', default='output/logs-Tacotron-2/')
 	parser.add_argument('--input_dir', default='training_data/', help='folder to contain inputs sentences/targets')
-	parser.add_argument('--mels_dir', default='tacotron_output/eval/', help='folder to contain mels to synthesize audio from using the Wavenet')
+	parser.add_argument('--mels_dir', default='output/logs-Tacotron-2/', help='folder to contain mels to synthesize audio from using the Wavenet')
 	parser.add_argument('--output_dir', default='output/', help='folder to contain synthesized mel spectrograms')
 	parser.add_argument('--mode', default='eval', help='mode of run: can be one of {}'.format(accepted_modes))
 	parser.add_argument('--GTA', default='True', help='Ground truth aligned synthesis, defaults to True, only considered in synthesis mode')

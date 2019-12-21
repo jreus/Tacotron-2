@@ -11,6 +11,8 @@ from .modules import (Conv1D1x1, ConvTranspose2D, ConvTranspose1D, ResizeConvolu
 	GaussianMaximumLikelihoodEstimation, MaskedMeanSquaredError, LeakyReluActivation, MaskedCrossEntropyLoss, ReluActivation, ResidualConv1DGLU, WeightNorm, Embedding)
 
 
+# if you are using Keras (backend as Tensorflow) the data_format='channels_last' with images reshaped
+# to (batch_size,row_size,column_size,channel_size) would solve the issue
 def _expand_global_features(batch_size, time_length, global_features, data_format='BCT'):
 	"""Expand global conditioning features to all time steps
 
@@ -26,7 +28,7 @@ def _expand_global_features(batch_size, time_length, global_features, data_forma
 	"""
 	accepted_formats = ['BCT', 'BTC']
 	if not (data_format in accepted_formats):
-		raise ValueError('{} is an unknow data format, accepted formats are "BCT" and "BTC"'.format(data_format))
+		raise ValueError('{} is an unknown data format, accepted formats are "BCT" and "BTC"'.format(data_format))
 
 	if global_features is None:
 		return None
@@ -38,10 +40,14 @@ def _expand_global_features(batch_size, time_length, global_features, data_forma
 	g = tf.reshape(global_features, [tf.shape(global_features)[0], tf.shape(global_features)[1], 1])
 	g_shape = tf.shape(g)
 
+
 	#[batch_size, channels, 1] ==> [batch_size, channels, time_length]
 	# ones = tf.ones([g_shape[0], g_shape[1], time_length], tf.int32)
 	# g = g * ones
 	g = tf.tile(g, [1, 1, time_length])
+
+	print("WHAT THE FUCK IS GOING ON???", global_features, g, g_shape)
+
 
 	if data_format == 'BCT':
 		return g

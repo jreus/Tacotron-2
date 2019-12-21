@@ -89,7 +89,8 @@ class WeightNorm(tf.keras.layers.Wrapper):
 			self.use_bias = layer.use_bias
 
 		super(WeightNorm, self).__init__(layer, name=name, **kwargs)
-		self._track_checkpointable(layer, name='layer')
+		#self._track_checkpointable(layer, name='layer')
+		self._track_trackable(layer, name='layer')
 
 	def set_mode(self, is_training):
 		self.layer.set_mode(is_training)
@@ -227,7 +228,8 @@ class CausalConv1D(tf.keras.layers.Wrapper):
 			layer = WeightNorm(layer, weight_normalization_init, weight_normalization_init_scale)
 
 		super(CausalConv1D, self).__init__(layer, name=name, **kwargs)
-		self._track_checkpointable(layer, name='layer')
+		#self._track_checkpointable(layer, name='layer')
+		self._track_trackable(layer, name='layer')
 		self.kw = kernel_size
 		self.dilation_rate = self.layer.dilation_rate
 		self.scope = 'CausalConv1D' if name is None else name
@@ -266,7 +268,7 @@ class CausalConv1D(tf.keras.layers.Wrapper):
 		self.linearized_weights = self._get_linearized_weight(in_channels)
 		super(CausalConv1D, self).build()
 		self.built = True
-		 
+
 	def call(self, inputs, incremental=False, convolution_queue=None):
 		"""Call 'Layer'"""
 		with tf.variable_scope(self.scope) as scope:
@@ -405,9 +407,9 @@ class ResidualConv1DGLU(tf.keras.layers.Wrapper):
 			skip_out_channels = residual_channels
 
 		conv = CausalConv1D(gate_channels, kernel_size,
-			dilation_rate=dilation_rate, use_bias=use_bias, 
-			weight_normalization=weight_normalization, 
-			weight_normalization_init=init, 
+			dilation_rate=dilation_rate, use_bias=use_bias,
+			weight_normalization=weight_normalization,
+			weight_normalization_init=init,
 			weight_normalization_init_scale=init_scale,
 			name='residual_block_causal_conv_{}'.format(name))
 
@@ -415,9 +417,9 @@ class ResidualConv1DGLU(tf.keras.layers.Wrapper):
 		#Local conditioning
 		if cin_channels > 0:
 			self.conv1x1c = Conv1D1x1(gate_channels, use_bias=use_bias,
-				weight_normalization=weight_normalization, 
-				weight_normalization_init=init, 
-				weight_normalization_init_scale=init_scale, 
+				weight_normalization=weight_normalization,
+				weight_normalization_init=init,
+				weight_normalization_init_scale=init_scale,
 				name='residual_block_cin_conv_{}'.format(name))
 
 		else:
@@ -426,8 +428,8 @@ class ResidualConv1DGLU(tf.keras.layers.Wrapper):
 		#Global conditioning
 		if gin_channels > 0:
 			self.conv1x1g = Conv1D1x1(gate_channels, use_bias=use_bias,
-				weight_normalization=weight_normalization, 
-				weight_normalization_init=init, 
+				weight_normalization=weight_normalization,
+				weight_normalization_init=init,
 				weight_normalization_init_scale=init_scale,
 				name='residual_block_gin_conv_{}'.format(name))
 
@@ -437,15 +439,15 @@ class ResidualConv1DGLU(tf.keras.layers.Wrapper):
 
 		gate_out_channels = gate_channels // 2
 
-		self.conv1x1_out = Conv1D1x1(residual_channels, use_bias=use_bias, 
-			weight_normalization=weight_normalization, 
-			weight_normalization_init=init, 
+		self.conv1x1_out = Conv1D1x1(residual_channels, use_bias=use_bias,
+			weight_normalization=weight_normalization,
+			weight_normalization_init=init,
 			weight_normalization_init_scale=init_scale,
 			name='residual_block_out_conv_{}'.format(name))
 
-		self.conv1x1_skip = Conv1D1x1(skip_out_channels, use_bias=use_bias, 
-			weight_normalization=weight_normalization, 
-			weight_normalization_init=init, 
+		self.conv1x1_skip = Conv1D1x1(skip_out_channels, use_bias=use_bias,
+			weight_normalization=weight_normalization,
+			weight_normalization_init=init,
 			weight_normalization_init_scale=init_scale,
 			name='residual_block_skip_conv_{}'.format(name))
 

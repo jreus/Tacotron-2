@@ -16,7 +16,7 @@ class Feeder:
 		Feeds batches of data into queue on a background thread.
 	"""
 
-	def __init__(self, coordinator, metadata_filename, hparams):
+	def __init__(self, coordinator, metadata_filepath, hparams):
 		super(Feeder, self).__init__()
 		self._coord = coordinator
 		self._hparams = hparams
@@ -25,10 +25,10 @@ class Feeder:
 		self._test_offset = 0
 
 		# Load metadata
-		self._mel_dir = os.path.join(os.path.dirname(metadata_filename), 'mels')
-		self._linear_dir = os.path.join(os.path.dirname(metadata_filename), 'linear')
-		print("METADATA FILENAME!!!!", metadata_filename)
-		with open(metadata_filename, encoding='utf-8') as f:
+		self._mel_dir = os.path.join(os.path.dirname(metadata_filepath), 'mels')
+		self._linear_dir = os.path.join(os.path.dirname(metadata_filepath), 'linear')
+		print("METADATA FILENAME!!!!", metadata_filepath)
+		with open(metadata_filepath, encoding='utf-8') as f:
 			self._metadata = [line.strip().split('|') for line in f]
 			frame_shift_ms = hparams.hop_size / hparams.sample_rate
 			hours = sum([int(x[4]) for x in self._metadata]) * frame_shift_ms / (3600)

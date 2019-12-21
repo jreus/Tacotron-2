@@ -34,8 +34,8 @@ def read_seq(file):
 def prepare_run(args):
 	modified_hp = hparams.parse(args.hparams)
 	os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(args.tf_log_level)
-	run_name = args.name or args.model
-	log_dir = os.path.join(args.base_dir, 'logs-{}'.format(run_name))
+	run_name = args.jobname or args.modeltype
+	log_dir = os.path.join(args.output_dir, 'logs-{}'.format(run_name))
 	os.makedirs(log_dir, exist_ok=True)
 	infolog.init(os.path.join(log_dir, 'Terminal_train_log'), run_name, args.slack_url)
 	return log_dir, modified_hp
@@ -60,6 +60,7 @@ def train(args, log_dir, hparams):
 	else:
 		checkpoint = os.path.join(log_dir, 'taco_pretrained/')
 
+	# THIS SYNTHESIZES THE DATA TO BE CONSUMED BY THE WAVENET MODEL
 	if not GTA_state:
 		log('\n#############################################################\n')
 		log('Tacotron GTA Synthesis\n')
@@ -71,7 +72,7 @@ def train(args, log_dir, hparams):
 		GTA_state = 1
 		save_seq(state_file, [taco_state, GTA_state, wave_state], input_path)
 	else:
-		input_path = os.path.join('tacotron_' + args.output_dir, 'gta', 'map.txt')
+		input_path = os.path.join(args.output_dir, 'gta', 'map.txt')
 
 	if input_path == '' or input_path is None:
 		raise RuntimeError('input_path has an unpleasant value -> {}'.format(input_path))

@@ -20,7 +20,7 @@ class Feeder:
 	"""
 		Feeds batches of data into queue in a background thread.
 	"""
-	def __init__(self, coordinator, metadata_filename, base_dir, hparams):
+	def __init__(self, coordinator, metadata_filepath, trainingdata_basedir, hparams):
 		super(Feeder, self).__init__()
 
 		self._coord = coordinator
@@ -34,11 +34,11 @@ class Feeder:
 			self._spec_pad = 0.
 
 		#Base directory of the project (to map files from different locations)
-		self._base_dir = base_dir
+		self._base_dir = trainingdata_basedir
 
 		#Load metadata
-		self._data_dir = os.path.dirname(metadata_filename)
-		with open(metadata_filename, 'r') as f:
+		self._data_dir = os.path.dirname(metadata_filepath)
+		with open(metadata_filepath, 'r') as f:
 			self._metadata = [line.strip().split('|') for line in f]
 
 		#Train test split
@@ -174,10 +174,14 @@ class Feeder:
 			mel_file = meta[1]
 		audio_file = meta[0]
 
-		input_data = np.load(os.path.join(self._base_dir, audio_file))
+		# NOTE: The map.txt file seems to have full filepaths...
+		#input_data = np.load(os.path.join(self._base_dir, audio_file))
+		input_data = np.load(audio_file)
 
 		if self.local_condition:
-			local_condition_features = np.load(os.path.join(self._base_dir, mel_file))
+			# Same here, the mel files are stored as full filepaths
+			#local_condition_features = np.load(os.path.join(self._base_dir, mel_file))
+			local_condition_features = np.load( mel_file)
 		else:
 			local_condition_features = None
 
@@ -246,10 +250,13 @@ class Feeder:
 			mel_file = meta[1]
 		audio_file = meta[0]
 
-		input_data = np.load(os.path.join(self._base_dir, audio_file))
+		# audio_file is a full filepath
+		#input_data = np.load(os.path.join(self._base_dir, audio_file))
+		input_data = np.load(audio_file)
 
 		if self.local_condition:
-			local_condition_features = np.load(os.path.join(self._base_dir, mel_file))
+			#local_condition_features = np.load(os.path.join(self._base_dir, mel_file))
+			local_condition_features = np.load(mel_file)
 		else:
 			local_condition_features = None
 

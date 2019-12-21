@@ -40,10 +40,12 @@ def run_live(args, checkpoint_path, hparams):
 			break
 
 def run_eval(args, checkpoint_path, output_dir, hparams, sentences):
-	eval_dir = os.path.join(output_dir, 'eval')
-	log_dir = os.path.join(output_dir, 'logs-eval')
+	eval_dir = os.path.join(output_dir, 'logs-Tacotron-2/')
+	print("OUTPUT {}     EVAL: {}".format(output_dir, eval_dir))
+	log_dir = os.path.join(output_dir, 'logs-Tacotron-2/eval-dir/')
 
 	if args.model == 'Tacotron-2':
+		print("EVALDIR: {}    MEL_DIR: {}".format(eval_dir, args.mels_dir))
 		assert os.path.normpath(eval_dir) == os.path.normpath(args.mels_dir)
 
 	#Create output path if it doesn't exist
@@ -85,7 +87,7 @@ def run_synthesis(args, checkpoint_path, output_dir, hparams):
 		os.makedirs(synth_dir, exist_ok=True)
 
 
-	metadata_filename = os.path.join(args.input_dir, 'train.txt')
+	metadata_filename = os.path.join(args.tacotron_input_dir, 'train.txt')
 	log(hparams_debug_string())
 	synth = Synthesizer()
 	synth.load(checkpoint_path, hparams, gta=GTA)
@@ -99,8 +101,8 @@ def run_synthesis(args, checkpoint_path, output_dir, hparams):
 	metadata = [metadata[i: i+hparams.tacotron_synthesis_batch_size] for i in range(0, len(metadata), hparams.tacotron_synthesis_batch_size)]
 
 	log('Starting Synthesis')
-	mel_dir = os.path.join(args.input_dir, 'mels')
-	wav_dir = os.path.join(args.input_dir, 'audio')
+	mel_dir = os.path.join(args.tacotron_input_dir, 'mels')
+	wav_dir = os.path.join(args.tacotron_input_dir, 'audio')
 	with open(os.path.join(synth_dir, 'map.txt'), 'w') as file:
 		for i, meta in enumerate(tqdm(metadata)):
 			texts = [m[5] for m in meta]
@@ -115,8 +117,8 @@ def run_synthesis(args, checkpoint_path, output_dir, hparams):
 	return os.path.join(synth_dir, 'map.txt')
 
 def tacotron_synthesize(args, hparams, checkpoint, sentences=None):
-	output_dir = 'tacotron_' + args.output_dir
-
+	output_dir = args.output_dir
+	print("OUTPUT DIR: {}".format(output_dir))
 	try:
 		checkpoint_path = tf.train.get_checkpoint_state(checkpoint).model_checkpoint_path
 		log('loaded model at {}'.format(checkpoint_path))

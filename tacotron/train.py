@@ -78,9 +78,9 @@ def add_eval_stats(summary_writer, step, linear_loss, before_loss, after_loss, s
 def model_train_mode(args, feeder, hparams, global_step):
 	with tf.variable_scope('Tacotron_model', reuse=tf.AUTO_REUSE) as scope:
 		model_name = None
-		if args.model == 'Tacotron-2':
+		if args.modeltype == 'Tacotron-2':
 			model_name = 'Tacotron'
-		model = create_model(model_name or args.model, hparams)
+		model = create_model(model_name or args.modeltype, hparams)
 		if hparams.predict_linear:
 			model.initialize(feeder.inputs, feeder.input_lengths, feeder.mel_targets, feeder.token_targets, linear_targets=feeder.linear_targets,
 				targets_lengths=feeder.targets_lengths, global_step=global_step,
@@ -97,9 +97,9 @@ def model_train_mode(args, feeder, hparams, global_step):
 def model_test_mode(args, feeder, hparams, global_step):
 	with tf.variable_scope('Tacotron_model', reuse=tf.AUTO_REUSE) as scope:
 		model_name = None
-		if args.model == 'Tacotron-2':
+		if args.modeltype == 'Tacotron-2':
 			model_name = 'Tacotron'
-		model = create_model(model_name or args.model, hparams)
+		model = create_model(model_name or args.modeltype, hparams)
 		if hparams.predict_linear:
 			model.initialize(feeder.eval_inputs, feeder.eval_input_lengths, feeder.eval_mel_targets, feeder.eval_token_targets,
 				linear_targets=feeder.eval_linear_targets, targets_lengths=feeder.eval_targets_lengths, global_step=global_step,
@@ -132,7 +132,7 @@ def train(log_dir, args, hparams):
 	os.makedirs(meta_folder, exist_ok=True)
 
 	checkpoint_path = os.path.join(save_dir, 'tacotron_model.ckpt')
-	input_path = os.path.join(args.base_dir, args.tacotron_input)
+	input_path = os.path.join(args.tacotron_input_dir, "train.txt")
 
 	if hparams.predict_linear:
 		linear_dir = os.path.join(log_dir, 'linear-spectrograms')
@@ -140,7 +140,7 @@ def train(log_dir, args, hparams):
 
 	log('Checkpoint path: {}'.format(checkpoint_path))
 	log('Loading training data from: {}'.format(input_path))
-	log('Using model: {}'.format(args.model))
+	log('Using model: {}'.format(args.modeltype))
 	log(hparams_debug_string())
 
 	#Start by setting a seed for repeatability
@@ -345,7 +345,7 @@ def train(log_dir, args, hparams):
 
 						#Save real and predicted linear-spectrogram plot to disk (control purposes)
 						plot.plot_spectrogram(linear_prediction, os.path.join(plot_dir, 'step-{}-linear-spectrogram.png'.format(step)),
-							title='{}, {}, step={}, loss={:.5f}'.format(args.model, time_string(), step, loss), target_spectrogram=linear_target,
+							title='{}, {}, step={}, loss={:.5f}'.format(args.modeltype, time_string(), step, loss), target_spectrogram=linear_target,
 							max_len=target_length, auto_aspect=True)
 
 					else:
@@ -371,11 +371,11 @@ def train(log_dir, args, hparams):
 
 					#save alignment plot to disk (control purposes)
 					plot.plot_alignment(alignment, os.path.join(plot_dir, 'step-{}-align.png'.format(step)),
-						title='{}, {}, step={}, loss={:.5f}'.format(args.model, time_string(), step, loss),
+						title='{}, {}, step={}, loss={:.5f}'.format(args.modeltype, time_string(), step, loss),
 						max_len=target_length // hparams.outputs_per_step)
 					#save real and predicted mel-spectrogram plot to disk (control purposes)
 					plot.plot_spectrogram(mel_prediction, os.path.join(plot_dir, 'step-{}-mel-spectrogram.png'.format(step)),
-						title='{}, {}, step={}, loss={:.5f}'.format(args.model, time_string(), step, loss), target_spectrogram=target,
+						title='{}, {}, step={}, loss={:.5f}'.format(args.modeltype, time_string(), step, loss), target_spectrogram=target,
 						max_len=target_length)
 					log('Input at step {}: {}'.format(step, sequence_to_text(input_seq)))
 
